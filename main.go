@@ -11,11 +11,12 @@ import (
 func init() {
 	// loads values from .env into the system
 	config.Load()
-	fmt.Println(config.ApiPort)
+
 }
 
 func main() {
 	fmt.Printf("Running api in %d\n", config.ApiPort)
+	fmt.Println(config.SecretKey)
 	r := router.Generate()
 
 	log.Fatal(http.ListenAndServe(fmt.Sprintf(":%d", config.ApiPort), r))

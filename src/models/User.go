@@ -5,6 +5,7 @@ import (
 	"strings"
 	"time"
 
+	"github.com/badoux/checkmail"
 	uuid "github.com/satori/go.uuid"
 )
 
@@ -26,6 +27,9 @@ func (user *User) validate() error {
 	}
 	if user.Email == "" {
 		return errors.New("email is required")
+	}
+	if err := checkmail.ValidateFormat(user.Email); err != nil {
+		return errors.New("invalid email format")
 	}
 	if user.Password == "" {
 		return errors.New("password is required")

@@ -81,3 +81,12 @@ func (repository Users) DeleteUser(id string) error {
 	}
 	return nil
 }
+
+func (repository Users) GetUserByEmail(email string) (models.User, error) {
+	var findUser models.User
+	result := repository.db.First(&findUser, "email=?", email)
+	if result.Error != nil {
+		return models.User{}, result.Error
+	}
+	return models.User{Email: email, Password: findUser.Password}, nil
+}

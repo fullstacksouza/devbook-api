@@ -1,6 +1,7 @@
 package repositories
 
 import (
+	"devbook-api/security"
 	"devbook-api/src/models"
 	"fmt"
 
@@ -19,17 +20,22 @@ func NewUserRepository(db *gorm.DB) *Users {
 //Create insert user in db and return user
 func (repository Users) Create(user models.User) (models.User, error) {
 	userId := uuid.NewV4()
+	hashedPassword, err := security.Hash(user.Password)
+	if err != nil {
+		return models.User{}, err
+	}
 	saveUser := models.User{
 		ID:       userId,
 		Name:     user.Name,
 		Nick:     user.Nick,
 		Email:    user.Email,
-		Password: user.Password,
+		Password: string(hashedPassword),
 	}
 	result := repository.db.Create(&saveUser)
 	if result.Error != nil {
 		return models.User{}, result.Error
 	}
+	repository.db.Omit("password").First(&saveUser)
 	return saveUser, nil
 }
 

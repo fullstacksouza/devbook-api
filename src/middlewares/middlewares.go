@@ -1,7 +1,8 @@
 package middlewares
 
 import (
-	"fmt"
+	"devbook-api/src/authentication"
+	"devbook-api/src/responses"
 	"log"
 	"net/http"
 )
@@ -15,7 +16,9 @@ func Logger(next http.HandlerFunc) http.HandlerFunc {
 
 func Authenticate(next http.HandlerFunc) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		fmt.Println("Validating...")
+		if err := authentication.ValidToken(r); err != nil {
+			responses.Error(w, http.StatusUnauthorized, err)
+		}
 		next(w, r)
 	}
 }

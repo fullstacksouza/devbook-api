@@ -1,11 +1,13 @@
 package controllers
 
 import (
+	"devbook-api/src/authentication"
 	"devbook-api/src/database"
 	"devbook-api/src/models"
 	"devbook-api/src/repositories"
 	"devbook-api/src/responses"
 	"encoding/json"
+	"errors"
 	"io/ioutil"
 	"net/http"
 	"strings"
@@ -92,7 +94,15 @@ func UpdateUser(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	userId := params["userId"]
-
+	tokenUserId, err := authentication.ExtractUserId(r)
+	if err != nil {
+		responses.Error(w, http.StatusUnauthorized, err)
+		return
+	}
+	if userId != tokenUserId {
+		responses.Error(w, http.StatusForbidden, errors.New("forbidden"))
+		return
+	}
 	var userData models.User
 	if err = json.Unmarshal(requestBody, &userData); err != nil {
 		responses.Error(w, http.StatusBadRequest, err)

@@ -88,5 +88,5 @@ func (repository Users) GetUserByEmail(email string) (models.User, error) {
 	if result.Error != nil {
 		return models.User{}, result.Error
 	}
-	return models.User{Email: email, Password: findUser.Password}, nil
+	return findUser, nil
 }

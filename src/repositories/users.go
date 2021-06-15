@@ -7,6 +7,7 @@ import (
 
 	uuid "github.com/satori/go.uuid"
 	"gorm.io/gorm"
+	"gorm.io/gorm/clause"
 )
 
 type Users struct {
@@ -89,4 +90,104 @@ func (repository Users) GetUserByEmail(email string) (models.User, error) {
 		return models.User{}, result.Error
 	}
 	return findUser, nil
+}
+
+func (repository Users) FollowUser(userToFollowId, followerId string) error {
+	parsedUserId, err := uuid.FromString(userToFollowId)
+
+	if err != nil {
+		return err
+	}
+	parsedFollowerId, err := uuid.FromString(followerId)
+	if err != nil {
+		return err
+	}
+	follower := models.Follower{UserID: parsedUserId, FollowerId: parsedFollowerId}
+	result := repository.db.Clauses(clause.OnConflict{DoNothing: true}).Create(&follower)
+	if result.Error != nil {
+		return result.Error
+	}
+	return nil
+}
+
+func (repository Users) UnfollowUser(userToUnfollowId, followerId string) error {
+	parsedUserId, err := uuid.FromString(userToUnfollowId)
+
+	if err != nil {
+		return err
+	}
+	parsedFollowerId, err := uuid.FromString(followerId)
+	if err != nil {
+		return err
+	}
+	follower := models.Follower{UserID: parsedUserId, FollowerId: parsedFollowerId}
+	result := repository.db.First(&follower).Delete(&follower)
+	if result.Error != nil {
+		return result.Error
+	}
+	return nil
+}
+
+func (repository Users) GetFollowers(userId string) ([]models.User, error) {
+	parsedUserId, err := uuid.FromString(userId)
+
+	if err != nil {
+		return nil, err
+	}
+
+	var followers []models.User
+	res := repository.db.Model(&models.User{}).Select("users.name, users.nick", "users.id").Joins("inner join followers on users.id = followers.follower_id").Where("followers.user_id = ?", parsedUserId).Scan(&followers)
+	if res.Error != nil {
+		return nil, res.Error
+	}
+	fmt.Println(followers)
+	return followers, nil
+}
+
+func (repository Users) GetFollowing(userId string) ([]models.User, error) {
+	parsedUserId, err := uuid.FromString(userId)
+
+	if err != nil {
+		return nil, err
+	}
+
+	var followers []models.User
+	res := repository.db.Model(&models.User{}).Select("users.name, users.nick", "users.id").Joins("inner join followers on users.id = followers.user_id").Where("followers.follower_id = ?", parsedUserId).Scan(&followers)
+	if res.Error != nil {
+		return nil, res.Error
+	}
+	fmt.Println(followers)
+	return followers, nil
+}
+
+func (repository Users) GetCurrentPassword(userId string) (string, error) {
+	parsedUserId, err := uuid.FromString(userId)
+
+	if err != nil {
+		return "", err
+	}
+
+	var user models.User
+	res := repository.db.Model(&user).Select("password").Where("id = ?", parsedUserId).Scan(&user)
+	if res.Error != nil {
+		return "", res.Error
+	}
+	return user.Password, nil
+}
+
+func (repository Users) UpdatePassword(userId, newPassword string) error {
+	parsedUserId, err := uuid.FromString(userId)
+
+	if err != nil {
+		return err
+	}
+
+	var user models.User
+	res := repository.db.Find(&user, "id = ?", parsedUserId)
+	if res.Error != nil {
+		return res.Error
+	}
+	user.Password = newPassword
+	repository.db.Save(&user)
+	return nil
 }

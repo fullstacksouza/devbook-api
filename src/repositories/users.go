@@ -85,7 +85,7 @@ func (repository Users) DeleteUser(id string) error {
 
 func (repository Users) GetUserByEmail(email string) (models.User, error) {
 	var findUser models.User
-	result := repository.db.First(&findUser, "email=?", email)
+	result := repository.db.Unscoped().First(&findUser, "email=?", email)
 	if result.Error != nil {
 		return models.User{}, result.Error
 	}

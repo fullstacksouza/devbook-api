@@ -7,15 +7,18 @@ import (
 
 	"github.com/badoux/checkmail"
 	uuid "github.com/satori/go.uuid"
+	"gorm.io/gorm"
 )
 
 type User struct {
+	gorm.Model
 	ID        uuid.UUID `json:"id,omitempty" gorm:"primaryKey"`
 	Name      string    `json:"name,omitempty"`
 	Nick      string    `json:"nick,omitempty"`
 	Email     string    `json:"email,omitempty"`
 	Password  string    `json:"password,omitempty"`
 	CreatedAt time.Time `json:"created_at,omitempty"`
+	Posts     []Post    `gorm:"foreignKey:AuthorID;references:ID"`
 }
 
 func (user *User) validate() error {

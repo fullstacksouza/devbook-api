@@ -53,7 +53,7 @@ func (postRepository Posts) FindPostById(postId string) (models.Post, error) {
 func (postRepository Posts) GetPosts(userId string) ([]models.Post, error) {
 	var posts []models.Post
 
-	result := postRepository.db.Joins("User").Find(&posts).Joins("join followers on followers.user_id = posts.author_id").Where("followers.follower_id = ? ", userId).Scan(&posts)
+	result := postRepository.db.Joins("User").Joins("Likes").Find(&posts).Joins("join followers on followers.user_id = posts.author_id").Where("followers.follower_id = ? ", userId).Scan(&posts)
 	if result.Error != nil {
 		return []models.Post{}, result.Error
 	}

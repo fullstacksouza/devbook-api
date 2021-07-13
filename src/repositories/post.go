@@ -87,3 +87,16 @@ func (postRepository Posts) DeletePost(postId string) error {
 	postRepository.db.Delete(&findPost)
 	return nil
 }
+
+func (postRepository Posts) GetPostsByUserId(userId string) ([]models.Post, error) {
+	var posts []models.Post
+	result := postRepository.db.Preload("User").Find(&posts, "author_id = ?", userId)
+
+	if result.Error != nil {
+		return posts, result.Error
+	}
+	for _, post := range posts {
+		post.Sanitize()
+	}
+	return posts, nil
+}

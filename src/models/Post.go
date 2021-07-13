@@ -15,7 +15,7 @@ type Post struct {
 	AuthorID  string    `json:"authorId,omitempty"`
 	CreatedAt time.Time `json:"created_at,omitempty"`
 	UpdatedAt time.Time `json:"updated_at,omitempty"`
-	Likes     uint64    `json:"likes,omitempty" gorm:"-"`
+	Likes     uint      `json:"likes"`
 	User      *User     `json:"author,omitempty" gorm:"foreignKey:AuthorID"`
 }
 
@@ -44,4 +44,5 @@ func (post *Post) format() {
 
 func (post *Post) Sanitize() {
 	post.User.Password = ""
+	post.Title = "asd2132132132"
 }

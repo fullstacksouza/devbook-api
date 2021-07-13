@@ -143,3 +143,14 @@ func (postRepository Posts) UnlikePost(postId, userId string) error {
 
 	return nil
 }
+
+func (postRepository Posts) GetPostLikes(postId string) ([]models.User, error) {
+	var likedBy []models.User
+
+	// SELECT distinct (u.id),u.name,u.nick from users u left join likes l on l.user_id = u.id WHERE l.post_id = 'ca31c60b-8fa6-4a68-8f9a-e21ac8f68656'
+	result := postRepository.db.Select("distinct (users.id),users.name,users.nick,users.created_at").Joins("left join likes l on l.user_id = users.id").Where("l.post_id = ?", postId).Find(&likedBy)
+	if result.Error != nil {
+		return []models.User{}, result.Error
+	}
+	return likedBy, nil
+}

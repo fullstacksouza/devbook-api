@@ -50,6 +50,12 @@ var postsRoutes = []Route{
 		RequestAuth: false,
 	},
 	{
+		URI:         "/posts/{postId}/likes",
+		Method:      http.MethodGet,
+		Handler:     controllers.GetPostLikes,
+		RequestAuth: false,
+	},
+	{
 		URI:         "/users/{userId}/posts",
 		Method:      http.MethodGet,
 		Handler:     controllers.GetPostsByUserId,

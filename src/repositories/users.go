@@ -15,6 +15,10 @@ type Users struct {
 }
 
 func NewUserRepository(db *gorm.DB) *Users {
+	var user Users
+
+	db.Model(&user).Association("Posts")
+
 	return &Users{db}
 }
 
@@ -140,7 +144,7 @@ func (repository Users) GetFollowers(userId string) ([]models.User, error) {
 	if res.Error != nil {
 		return nil, res.Error
 	}
-	fmt.Println(followers)
+
 	return followers, nil
 }
 
@@ -156,7 +160,7 @@ func (repository Users) GetFollowing(userId string) ([]models.User, error) {
 	if res.Error != nil {
 		return nil, res.Error
 	}
-	fmt.Println(followers)
+
 	return followers, nil
 }
 

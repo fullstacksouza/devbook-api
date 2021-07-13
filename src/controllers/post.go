@@ -9,6 +9,8 @@ import (
 	"encoding/json"
 	"io/ioutil"
 	"net/http"
+
+	"github.com/gorilla/mux"
 )
 
 func CreatePost(w http.ResponseWriter, r *http.Request) {
@@ -27,6 +29,11 @@ func CreatePost(w http.ResponseWriter, r *http.Request) {
 		responses.Error(w, http.StatusBadRequest, err)
 		return
 	}
+	post.AuthorID = userId
+	if err = post.Prepare(); err != nil {
+		responses.Error(w, http.StatusBadRequest, err)
+		return
+	}
 	db, err := database.Connect()
 
 	if err != nil {
@@ -34,7 +41,7 @@ func CreatePost(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	repository := repositories.NewPostRepository(db)
-	createdPost, err := repository.Create(post, userId)
+	createdPost, err := repository.Create(post)
 	if err != nil {
 		responses.Error(w, http.StatusInternalServerError, err)
 		return
@@ -43,7 +50,45 @@ func CreatePost(w http.ResponseWriter, r *http.Request) {
 
 }
 func FindPostById(w http.ResponseWriter, r *http.Request) {
+	params := mux.Vars(r)
+	postId := params["postId"]
 
+	db, err := database.Connect()
+
+	if err != nil {
+		responses.Error(w, http.StatusInternalServerError, err)
+		return
+	}
+	repository := repositories.NewPostRepository(db)
+
+	findPost, err := repository.FindPostById(postId)
+	if err != nil {
+		responses.Error(w, http.StatusNotFound, err)
+		return
+	}
+	responses.JSON(w, http.StatusOK, findPost)
+
+}
+
+func GetAllPosts(w http.ResponseWriter, r *http.Request) {
+	userId, err := authentication.ExtractUserId(r)
+	if err != nil {
+		responses.Error(w, http.StatusUnauthorized, err)
+		return
+	}
+	db, err := database.Connect()
+
+	if err != nil {
+		responses.Error(w, http.StatusInternalServerError, err)
+		return
+	}
+	repository := repositories.NewPostRepository(db)
+	posts, err := repository.GetPosts(userId)
+	if err != nil {
+		responses.Error(w, http.StatusNotFound, err)
+		return
+	}
+	responses.JSON(w, http.StatusOK, posts)
 }
 func UpdatePost(w http.ResponseWriter, r *http.Request) {
 

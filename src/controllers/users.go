@@ -9,7 +9,6 @@ import (
 	"devbook-api/src/responses"
 	"encoding/json"
 	"errors"
-	"fmt"
 	"io/ioutil"
 	"net/http"
 	"strings"
@@ -222,7 +221,6 @@ func GetFollowers(w http.ResponseWriter, r *http.Request) {
 	}
 	repository := repositories.NewUserRepository(db)
 	followers, err := repository.GetFollowers(userId)
-	fmt.Println(followers)
 
 	if err != nil {
 		responses.Error(w, http.StatusInternalServerError, err)
@@ -244,7 +242,6 @@ func GetFollowing(w http.ResponseWriter, r *http.Request) {
 	}
 	repository := repositories.NewUserRepository(db)
 	followers, err := repository.GetFollowing(userId)
-	fmt.Println(followers)
 
 	if err != nil {
 		responses.Error(w, http.StatusInternalServerError, err)

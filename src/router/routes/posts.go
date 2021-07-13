@@ -20,6 +20,12 @@ var postsRoutes = []Route{
 		RequestAuth: true,
 	},
 	{
+		URI:         "/posts",
+		Method:      http.MethodGet,
+		Handler:     controllers.GetAllPosts,
+		RequestAuth: true,
+	},
+	{
 		URI:         "/posts/{postId}",
 		Method:      http.MethodPut,
 		Handler:     controllers.UpdatePost,

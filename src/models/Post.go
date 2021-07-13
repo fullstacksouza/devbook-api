@@ -44,5 +44,4 @@ func (post *Post) format() {
 
 func (post *Post) Sanitize() {
 	post.User.Password = ""
-	post.Title = "asd2132132132"
 }

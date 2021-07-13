@@ -42,7 +42,7 @@ func (postRepository Posts) Create(post models.Post) (models.Post, error) {
 
 func (postRepository Posts) FindPostById(postId string) (models.Post, error) {
 	var post models.Post
-	result := postRepository.db.Preload("User").First(&post, "id= ?", postId)
+	result := postRepository.db.Preload("User").Select("distinct(posts.id),posts.created_at,posts.title,posts.content,posts.author_id,count(likes) as likes").Joins("left join likes on posts.id = likes.post_id").Group("posts.id").Order("posts.created_at desc").First(&post, "id= ?", postId)
 	if result.Error != nil {
 		return models.Post{}, result.Error
 	}
@@ -53,7 +53,7 @@ func (postRepository Posts) FindPostById(postId string) (models.Post, error) {
 func (postRepository *Posts) GetPosts(userId string) ([]models.Post, error) {
 	var posts []models.Post
 
-	result := postRepository.db.Preload("User").Select("distinct(posts.id),posts.title,posts.content,posts.author_id,count(likes) as likes").Joins("left join likes on posts.id = likes.post_id").Group("posts.id").Find(&posts)
+	result := postRepository.db.Preload("User").Select("distinct(posts.id),posts.created_at,posts.title,posts.content,posts.author_id,count(likes) as likes").Joins("left join likes on posts.id = likes.post_id").Group("posts.id").Order("posts.created_at desc").Find(&posts)
 	if result.Error != nil {
 		return []models.Post{}, result.Error
 	}

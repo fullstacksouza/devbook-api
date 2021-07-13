@@ -38,6 +38,18 @@ var postsRoutes = []Route{
 		RequestAuth: true,
 	},
 	{
+		URI:         "/posts/{postId}/like",
+		Method:      http.MethodPost,
+		Handler:     controllers.LikePost,
+		RequestAuth: false,
+	},
+	{
+		URI:         "/posts/{postId}/unlike",
+		Method:      http.MethodPost,
+		Handler:     controllers.UnlikePost,
+		RequestAuth: false,
+	},
+	{
 		URI:         "/users/{userId}/posts",
 		Method:      http.MethodGet,
 		Handler:     controllers.GetPostsByUserId,

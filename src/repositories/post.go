@@ -5,6 +5,7 @@ import (
 
 	uuid "github.com/satori/go.uuid"
 	"gorm.io/gorm"
+	"gorm.io/gorm/clause"
 )
 
 type Posts struct {
@@ -99,4 +100,46 @@ func (postRepository Posts) GetPostsByUserId(userId string) ([]models.Post, erro
 		post.Sanitize()
 	}
 	return posts, nil
+}
+
+func (postRepository Posts) LikePost(postId, userId string) error {
+
+	parsedPostId, err := uuid.FromString(postId)
+	if err != nil {
+		return err
+	}
+	parsedUserId, err := uuid.FromString(userId)
+	if err != nil {
+		return err
+	}
+	like := models.Like{UserID: parsedUserId, PostID: parsedPostId}
+
+	result := postRepository.db.Clauses(clause.OnConflict{DoNothing: true}).Create(&like)
+
+	if result.Error != nil {
+		return result.Error
+	}
+
+	return nil
+}
+
+func (postRepository Posts) UnlikePost(postId, userId string) error {
+
+	parsedPostId, err := uuid.FromString(postId)
+	if err != nil {
+		return err
+	}
+	parsedUserId, err := uuid.FromString(userId)
+	if err != nil {
+		return err
+	}
+	like := models.Like{UserID: parsedUserId, PostID: parsedPostId}
+
+	result := postRepository.db.First(&like).Delete(&like)
+
+	if result.Error != nil {
+		return result.Error
+	}
+
+	return nil
 }

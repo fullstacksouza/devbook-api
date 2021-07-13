@@ -198,3 +198,57 @@ func GetPostsByUserId(w http.ResponseWriter, r *http.Request) {
 
 	responses.JSON(w, http.StatusOK, userPosts)
 }
+
+func LikePost(w http.ResponseWriter, r *http.Request) {
+	userId, err := authentication.ExtractUserId(r)
+
+	if err != nil {
+		responses.Error(w, http.StatusInternalServerError, err)
+		return
+	}
+	params := mux.Vars(r)
+	postId := params["postId"]
+
+	db, err := database.Connect()
+
+	if err != nil {
+		responses.Error(w, http.StatusInternalServerError, err)
+		return
+	}
+	repository := repositories.NewPostRepository(db)
+
+	likeError := repository.LikePost(postId, userId)
+
+	if likeError != nil {
+		responses.Error(w, http.StatusInternalServerError, err)
+		return
+	}
+	responses.JSON(w, http.StatusNoContent, nil)
+}
+
+func UnlikePost(w http.ResponseWriter, r *http.Request) {
+	userId, err := authentication.ExtractUserId(r)
+
+	if err != nil {
+		responses.Error(w, http.StatusInternalServerError, err)
+		return
+	}
+	params := mux.Vars(r)
+	postId := params["postId"]
+
+	db, err := database.Connect()
+
+	if err != nil {
+		responses.Error(w, http.StatusInternalServerError, err)
+		return
+	}
+	repository := repositories.NewPostRepository(db)
+
+	likeError := repository.UnlikePost(postId, userId)
+
+	if likeError != nil {
+		responses.Error(w, http.StatusInternalServerError, err)
+		return
+	}
+	responses.JSON(w, http.StatusNoContent, nil)
+}

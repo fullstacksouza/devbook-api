@@ -39,3 +39,19 @@ CREATE TABLE posts(
     REFERENCES users(id)
     ON DELETE CASCADE
 )
+
+    CREATE TABLE likes(
+            post_id varchar(36) ,not null,
+    FOREIGN KEY (post_id)
+    REFERENCES posts(id)
+    ON DELETE CASCADE,
+
+    user_id varchar(36) not null,
+    FOREIGN KEY (user_id)
+    REFERENCES users(id)
+    ON DELETE CASCADE
+    
+     craeted_at timestamp default current_timestamp,
+   updated_at timestamp default current_timestamp,
+    primary key(user_id,user_id)
+    )

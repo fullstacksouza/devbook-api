@@ -7,6 +7,7 @@ import (
 	"devbook-api/src/repositories"
 	"devbook-api/src/responses"
 	"encoding/json"
+	"errors"
 	"io/ioutil"
 	"net/http"
 
@@ -91,8 +92,88 @@ func GetAllPosts(w http.ResponseWriter, r *http.Request) {
 	responses.JSON(w, http.StatusOK, posts)
 }
 func UpdatePost(w http.ResponseWriter, r *http.Request) {
+	userId, err := authentication.ExtractUserId(r)
+	if err != nil {
+		responses.Error(w, http.StatusUnauthorized, err)
+		return
+	}
+	postId := mux.Vars(r)["postId"]
+	requestBody, err := ioutil.ReadAll(r.Body)
+	if err != nil {
+		responses.Error(w, http.StatusUnprocessableEntity, err)
+		return
+	}
+
+	var postData models.Post
+	if err = json.Unmarshal(requestBody, &postData); err != nil {
+		responses.Error(w, http.StatusBadRequest, err)
+		return
+	}
+
+	db, err := database.Connect()
+
+	if err != nil {
+		responses.Error(w, http.StatusInternalServerError, err)
+		return
+	}
+
+	repository := repositories.NewPostRepository(db)
+
+	findPost, err := repository.FindPostById(postId)
+
+	if err != nil {
+		responses.Error(w, http.StatusInternalServerError, err)
+		return
+	}
+
+	if findPost.AuthorID != userId {
+		responses.Error(w, http.StatusUnauthorized, errors.New("unauthorized"))
+		return
+	}
+
+	updatedPost, err := repository.UpdatePost(postId, postData)
+
+	if err != nil {
+		responses.Error(w, http.StatusInternalServerError, err)
+		return
+	}
+	responses.JSON(w, http.StatusOK, updatedPost)
 
 }
 func DeletePost(w http.ResponseWriter, r *http.Request) {
+	userId, err := authentication.ExtractUserId(r)
+	if err != nil {
+		responses.Error(w, http.StatusUnauthorized, err)
+		return
+	}
+	postId := mux.Vars(r)["postId"]
 
+	db, err := database.Connect()
+
+	if err != nil {
+		responses.Error(w, http.StatusInternalServerError, err)
+		return
+	}
+
+	repository := repositories.NewPostRepository(db)
+
+	findPost, err := repository.FindPostById(postId)
+
+	if err != nil {
+		responses.Error(w, http.StatusInternalServerError, err)
+		return
+	}
+
+	if findPost.AuthorID != userId {
+		responses.Error(w, http.StatusUnauthorized, errors.New("unauthorized"))
+		return
+	}
+	err = repository.DeletePost(postId)
+
+	if err != nil {
+		responses.Error(w, http.StatusInternalServerError, err)
+		return
+	}
+
+	responses.JSON(w, http.StatusNoContent, nil)
 }

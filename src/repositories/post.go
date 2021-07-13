@@ -41,8 +41,7 @@ func (postRepository Posts) Create(post models.Post) (models.Post, error) {
 
 func (postRepository Posts) FindPostById(postId string) (models.Post, error) {
 	var post models.Post
-	result := postRepository.db.Preload("User").Find(&post, "id = ?", postId)
-
+	result := postRepository.db.Preload("User").First(&post, "id= ?", postId)
 	if result.Error != nil {
 		return models.Post{}, result.Error
 	}
@@ -61,4 +60,30 @@ func (postRepository Posts) GetPosts(userId string) ([]models.Post, error) {
 		post.Sanitize()
 	}
 	return posts, nil
+}
+
+func (postRepository Posts) UpdatePost(postId string, post models.Post) (models.Post, error) {
+	var findPost models.Post
+
+	result := postRepository.db.Preload("User").First(&findPost, "id = ?", postId)
+	if result.Error != nil {
+		return models.Post{}, result.Error
+	}
+	findPost.Content = post.Content
+	findPost.Title = post.Title
+	findPost.Prepare()
+	postRepository.db.Save(&findPost)
+	findPost.Sanitize()
+	return findPost, nil
+}
+
+func (postRepository Posts) DeletePost(postId string) error {
+	var findPost models.Post
+
+	result := postRepository.db.First(&findPost, "id = ?", postId)
+	if result.Error != nil {
+		return result.Error
+	}
+	postRepository.db.Delete(&findPost)
+	return nil
 }

@@ -15,10 +15,6 @@ type Users struct {
 }
 
 func NewUserRepository(db *gorm.DB) *Users {
-	var user Users
-
-	db.Model(&user).Association("Posts")
-
 	return &Users{db}
 }
 

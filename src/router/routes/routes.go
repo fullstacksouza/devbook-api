@@ -18,6 +18,7 @@ func Setup(r *mux.Router) *mux.Router {
 	routes := userRoutes
 	routes = append(routes, authRoute)
 	routes = append(routes, postsRoutes...)
+	routes = append(routes, commentsRoutes...)
 	for _, route := range routes {
 		if route.RequestAuth {
 			r.HandleFunc(route.URI,
